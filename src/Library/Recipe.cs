@@ -6,6 +6,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
+using System.Threading;
 
 namespace Full_GRASP_And_SOLID
 {
@@ -13,6 +15,7 @@ namespace Full_GRASP_And_SOLID
     {
         // Cambiado por OCP
         private IList<BaseStep> steps = new List<BaseStep>();
+        public bool Cooked { get; private set; } = false;
 
         public Product FinalProduct { get; set; }
 
@@ -62,5 +65,34 @@ namespace Full_GRASP_And_SOLID
 
             return result;
         }
+        
+        public int GetCookTime()
+        {
+            int tiempo_de_cocina = 0;
+            foreach (BaseStep pasito in this.steps)
+                {
+                    tiempo_de_cocina += pasito.Time;
+                }
+            return tiempo_de_cocina*1000;
+       }
+
+       public void Cook()
+       {
+        CountdownTimer cronometro = new CountdownTimer();
+        cronometro.Register (GetCookTime(), new RecipeAux (this));
+       }
+       public class RecipeAux : TimerClient
+    {
+        public Recipe recipee;
+        public RecipeAux (Recipe recipe)
+        {
+            this.recipee = recipe;
+        }
+        public void TimeOut()
+        {
+            this.recipee.Cooked = true;
+        }
+    }
     }
 }
+
